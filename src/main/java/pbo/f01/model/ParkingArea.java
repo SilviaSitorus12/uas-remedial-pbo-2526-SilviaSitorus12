@@ -1,15 +1,21 @@
 package pbo.f01.model;
 
 // Nama: Silvia Eklesiana Sitorus
-// NIM: 12S24004
+// NIM : 12S24004
 
-import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Kelas ParkingArea merepresentasikan area parkir dengan kapasitas dan tipe kendaraan yang diizinkan.
- */
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
 @Entity
 @Table(name = "parking_area")
 public class ParkingArea {
@@ -21,85 +27,44 @@ public class ParkingArea {
     @Column(name = "name", nullable = false, unique = true, length = 100)
     private String name;
 
-    @Column(nullable = false)
-    private Integer capacity;
+    @Column(name = "capacity", nullable = false)
+    private int capacity;
 
     @Column(name = "allowed_type", nullable = false, length = 20)
     private String allowedType;
 
     @OneToMany(mappedBy = "parkingArea", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Vehicle> parkedVehicles;
+    private List<Vehicle> parkedVehicles = new ArrayList<>();
 
-    /**
-     * Konstruktor kosong wajib untuk JPA.
-     */
-    public ParkingArea() {
-        this.parkedVehicles = new ArrayList<>();
-    }
+    // Konstruktor kosong wajib untuk JPA
+    public ParkingArea() {}
 
-    /**
-     * Konstruktor dengan parameter.
-     *
-     * @param name nama area parkir
-     * @param capacity kapasitas area parkir
-     * @param allowedType tipe kendaraan yang diizinkan (car/motorcycle)
-     */
-    public ParkingArea(String name, Integer capacity, String allowedType) {
-        this.name = name;
-        this.capacity = capacity;
+    public ParkingArea(String name, int capacity, String allowedType) {
+        this.name        = name;
+        this.capacity    = capacity;
         this.allowedType = allowedType;
-        this.parkedVehicles = new ArrayList<>();
     }
 
-    // Getter methods
-    public Long getId() {
-        return id;
-    }
+    public Long          getId()             { return id; }
+    public String        getName()           { return name; }
+    public int           getCapacity()       { return capacity; }
+    public String        getAllowedType()     { return allowedType; }
+    public List<Vehicle> getParkedVehicles() { return parkedVehicles; }
 
-    public String getName() {
-        return name;
-    }
-
-    public Integer getCapacity() {
-        return capacity;
-    }
-
-    public String getAllowedType() {
-        return allowedType;
-    }
-
-    public List<Vehicle> getParkedVehicles() {
-        return parkedVehicles;
-    }
-
-    /**
-     * Cek apakah kendaraan dapat diparkir di area ini.
-     * Kondisi: tipe kendaraan sesuai AND belum penuh.
-     *
-     * @param v kendaraan yang akan diparkir
-     * @return true jika dapat diparkir, false sebaliknya
-     */
+    // Validasi: tipe cocok DAN kapasitas belum penuh
     public boolean canPark(Vehicle v) {
-        return v.getType().equals(allowedType) && parkedVehicles.size() < capacity;
+        return v.getType().equals(allowedType)
+            && parkedVehicles.size() < capacity;
     }
 
-    /**
-     * Tambahkan kendaraan ke area parkir.
-     * Otomatis set parkingArea pada kendaraan.
-     *
-     * @param v kendaraan yang akan ditambahkan
-     */
     public void addVehicle(Vehicle v) {
         parkedVehicles.add(v);
         v.setParkingArea(this);
     }
 
-    /**
-     * Format string dari area parkir: "Area Rektorat car 5|2"
-     * Format: "Area <name> <allowedType> <capacity>|<jumlahTerparkir>"
-     */
+    // Format: Area Rektorat car 5|2
     @Override
     public String toString() {
-        return "Area " + name + " " + allowedType + " " + capacity + "|" + parkedVehicles.size();
+        return name + " " + allowedType + " " + capacity + "|" + parkedVehicles.size();
     }
 }
